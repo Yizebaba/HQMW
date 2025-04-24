@@ -16,6 +16,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
+import streamlit as st
+import streamlit_antd_components as sac
 
 # 创建存储凭证和媒体文件的目录
 if not os.path.exists("credentials"):
@@ -1100,6 +1102,123 @@ if __name__ == "__main__":
         log_activity("无法加载配置，程序退出", "ERROR")
         exit(1)
     
+    # 页面设置
+    st.set_page_config(page_title="社交媒体自动化工具", layout="wide")
+
+    # 标题和简介
+    st.title("✨ 社交媒体自动化工具")
+    st.markdown("轻松管理多平台社交媒体账号，自动发布内容")
+
+    # 使用分割线美化界面
+    st.markdown("---")
+
+    # 使用按钮代替主菜单下拉框
+    st.subheader("请选择操作模式")
+
+    # 使用sac.buttons作为主菜单
+    operation_mode = sac.buttons([
+        sac.ButtonsItem(label='添加/管理账号', icon='person-plus-fill'),
+        sac.ButtonsItem(label='自动生成内容并发布', icon='send-fill'),
+        sac.ButtonsItem(label='设置定时发布', icon='clock-fill'),
+        sac.ButtonsItem(label='修改配置', icon='gear-fill'),
+        sac.ButtonsItem(label='查看统计数据', icon='graph-up-arrow')
+    ], align='center', format_func='title', size='md', color='blue', return_index=True)
+
+    # 根据选择的操作模式显示不同内容
+    if operation_mode == 0:  # 添加/管理账号
+        st.header("添加/管理账号")
+        
+        # 使用按钮代替平台下拉框
+        st.subheader("选择平台")
+        platform = sac.buttons([
+            sac.ButtonsItem(label='Instagram', icon='instagram'),
+            sac.ButtonsItem(label='Facebook', icon='facebook'),
+            sac.ButtonsItem(label='Twitter/X', icon='twitter'),
+            sac.ButtonsItem(label='VK', icon='chat-fill'),
+            sac.ButtonsItem(label='TikTok', icon='music-note'),
+            sac.ButtonsItem(label='Reddit', icon='reddit'),
+            sac.ButtonsItem(label='OK.ru', icon='person-circle')
+        ], index=None, format_func='title', align='start', direction='horizontal', size='sm', color='cyan', return_index=True)
+        
+        # 根据选择的平台显示账号表单
+        if platform is not None:
+            platforms = ['Instagram', 'Facebook', 'Twitter/X', 'VK', 'TikTok', 'Reddit', 'OK.ru']
+            selected_platform = platforms[platform]
+            
+            st.write(f"您选择了: {selected_platform}")
+            
+            # 创建两列布局
+            col1, col2 = st.columns(2)
+            
+            # 账号信息表单
+            with col1:
+                with st.form(key=f"{selected_platform}_account_form"):
+                    st.subheader(f"{selected_platform} 账号信息")
+                    username = st.text_input("用户名")
+                    password = st.text_input("密码", type="password")
+                    submit_button = st.form_submit_button("添加账号")
+                    
+                    if submit_button:
+                        if username and password:
+                            st.success(f"已成功添加 {selected_platform} 账号: {username}")
+                        else:
+                            st.error("请填写所有必填信息")
+            
+            # 显示账号列表
+            with col2:
+                st.subheader("已添加的账号")
+                st.info("这里将显示已添加的账号列表")
+                # 这里可以添加从配置文件加载账号信息的代码
+
+    elif operation_mode == 1:  # 自动生成内容并发布
+        st.header("自动生成内容并发布")
+        
+        # 使用列布局美化界面
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            # 使用按钮选择平台
+            st.subheader("选择发布平台")
+            publish_platforms = sac.checkbox_group([
+                sac.CheckboxItem(label='Instagram', icon='instagram'),
+                sac.CheckboxItem(label='Facebook', icon='facebook'),
+                sac.CheckboxItem(label='Twitter/X', icon='twitter'),
+                sac.CheckboxItem(label='其他平台', icon='three-dots')
+            ], format_func='title', align='start')
+            
+            # 使用按钮选择主题
+            st.subheader("内容主题")
+            theme = sac.buttons([
+                sac.ButtonsItem(label='旅行', icon='geo-alt'),
+                sac.ButtonsItem(label='美食', icon='cup-hot'),
+                sac.ButtonsItem(label='科技', icon='laptop'),
+                sac.ButtonsItem(label='生活方式', icon='house-heart'),
+                sac.ButtonsItem(label='健康', icon='heart-pulse'),
+                sac.ButtonsItem(label='时尚', icon='tag')
+            ], format_func='title', direction='horizontal', align='start', size='sm', color='green', return_index=True)
+        
+        with col2:
+            # 图片上传区域
+            st.subheader("上传图片 (可选)")
+            uploaded_file = st.file_uploader("选择图片", type=["jpg", "jpeg", "png"])
+            
+            if uploaded_file is not None:
+                st.image(uploaded_file, caption="上传的图片", use_column_width=True)
+            else:
+                st.info("如果不上传图片，系统将自动生成相关图片")
+        
+        # 发布按钮
+        if st.button("开始发布", type="primary"):
+            st.success("内容发布任务已启动！")
+            st.spinner("正在处理中...")
+            # 这里可以添加调用原始脚本功能的代码
+
+    # 其他操作模式的实现...
+
+    # 添加页脚
+    st.markdown("---")
+    st.markdown("🔧 社交媒体自动化工具 | 版本 3.0")
+
     # 选择操作模式
     print("\n请选择操作模式：")
     print("1. 添加/管理账号")
